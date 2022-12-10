@@ -31,6 +31,6 @@ public class Process {
 
     @Override
     public String toString() {
-        return String.format("Process{%s|%d|%.2fMB}", name, pid, memory/1024.0);
+        return String.format("Process{%s, pid=%d, memory=%.2fMB}", name, pid, memory/1024.0);
     }
 }
