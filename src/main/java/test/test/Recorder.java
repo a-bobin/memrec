@@ -3,7 +3,7 @@ package test.test;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Properties;
+import java.util.Map;
 
 import static test.test.FileUtils.*;
 import static test.test.WindowsUtils.getTotalMemory;
@@ -30,21 +30,15 @@ public class Recorder implements Runnable {
 
     public Recorder(boolean verbose) {
         this.verbose = verbose;
-        Properties properties = loadProperties();
-        processName = properties.getProperty("process");
-        interval = Integer.parseInt(properties.getProperty("interval")) * 1000;
-        csvSeparator = properties.getProperty("separator.csv");
-        decSeparator = properties.getProperty("separator.decimal");
-        showOverlay = Boolean.parseBoolean(properties.getProperty("overlay.show"));
-        int overlayOpacity = Integer.parseInt(properties.getProperty("overlay.opacity"));
-        int fontSize = Integer.parseInt(properties.getProperty("overlay.font.size"));
-        String[] fontColorRGB = properties.getProperty("overlay.font.color").split(",");
-
-        if (processName == null || interval < 1 || csvSeparator == null || decSeparator == null ||
-                overlayOpacity < 0 || overlayOpacity > 255 || fontSize < 10 || fontSize > 42
-                || fontColorRGB.length < 3) {
-            throw new IllegalArgumentException();
-        }
+        Map<String, String> properties = getPropertiesMap();
+        processName = properties.get("process");
+        interval = Integer.parseInt(properties.get("interval")) * 1000;
+        csvSeparator = properties.get("separator.csv");
+        decSeparator = properties.get("separator.decimal");
+        showOverlay = Boolean.parseBoolean(properties.get("overlay.show"));
+        int overlayOpacity = Integer.parseInt(properties.get("overlay.opacity"));
+        int fontSize = Integer.parseInt(properties.get("overlay.font.size"));
+        String[] fontColorRGB = properties.get("overlay.font.color").split(",");
 
         fileName = generateFileName(processName);
         createLogDir();
