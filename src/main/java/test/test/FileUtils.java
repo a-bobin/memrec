@@ -18,6 +18,7 @@ public class FileUtils {
     static final String DATETIME_FORMAT = "M/d/yy HH:mm:ss";
 
     static final String PATH_TO_PROPERTIES = "./memrec.properties";
+    static final String LOG_DIR_PATH = "log/";
 
     static final String DEFAULT_PROPERTIES = "" +
             "process=java.exe\n" +

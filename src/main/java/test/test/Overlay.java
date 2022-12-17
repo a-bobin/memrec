@@ -23,6 +23,7 @@ public class Overlay {
         panel.add(box);
 
         JFrame frame = new DraggableFramelessWindow("Overlay");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setAlwaysOnTop(true);
         frame.setPreferredSize(new Dimension((
                 processName.length() < 8 ? fontSize*6 : (fontSize-9)*(processName.length()+4)),

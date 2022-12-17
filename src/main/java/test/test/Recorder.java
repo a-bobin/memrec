@@ -78,7 +78,7 @@ public class Recorder implements Runnable {
         if (verbose) {
             System.out.println("Writing line '" + line + "' to log");
         }
-        writeToFile(line + "\n", "log/" + fileName);
+        writeToFile(line + "\n", LOG_DIR_PATH + fileName);
     }
 
     private void drawOverlay(String memory, LocalDateTime time) {
