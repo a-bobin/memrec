@@ -66,11 +66,15 @@ public class Recorder implements Runnable {
             }
 
             try {
-                Thread.sleep(interval - System.currentTimeMillis() + tStart);
+                Thread.sleep(recalculateSleepTime(interval, System.currentTimeMillis() - tStart));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private long recalculateSleepTime(long interval, long workingTimeDelta) {
+        return interval < workingTimeDelta ? recalculateSleepTime(interval + 1000, workingTimeDelta) : interval - workingTimeDelta;
     }
 
     private void record(String memory, LocalDateTime time) {

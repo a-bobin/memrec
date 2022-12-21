@@ -35,6 +35,7 @@ target/
 *.log
 *.sql
 *.sqlite
+*.csv
 
 # OS generated files #
 ######################
