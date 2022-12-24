@@ -55,8 +55,10 @@ public class Recorder implements Runnable {
 
     @Override
     public void run() {
-
+        long tStart0 = System.currentTimeMillis();
+        int counter = 0;
         while (true) {
+            long correction = ++counter % 10 == 0 ? (System.currentTimeMillis() - tStart0)%1000L : 0;
             long tStart = System.currentTimeMillis();
             LocalDateTime now = LocalDateTime.now();
             String memory = String.format("%.2f", getTotalMemory(processName) / 1024.0).replaceAll("\\D", decSeparator);
@@ -66,15 +68,15 @@ public class Recorder implements Runnable {
             }
 
             try {
-                Thread.sleep(recalculateSleepTime(interval, System.currentTimeMillis() - tStart));
+                Thread.sleep(recalculateSleepTime(interval - correction, System.currentTimeMillis() - tStart, 1000));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private long recalculateSleepTime(long interval, long workingTimeDelta) {
-        return interval < workingTimeDelta ? recalculateSleepTime(interval + 1000, workingTimeDelta) : interval - workingTimeDelta;
+    private long recalculateSleepTime(long interval, long workingTime, long step) {
+        return interval < workingTime ? recalculateSleepTime(interval + step, workingTime, step) : interval - workingTime;
     }
 
     private void record(String memory, LocalDateTime time) {

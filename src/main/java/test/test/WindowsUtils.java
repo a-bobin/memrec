@@ -10,10 +10,11 @@ import java.util.stream.Collectors;
 
 public class WindowsUtils {
 
-    public static List<Process> listRunningProcesses() {
+    public static List<Process> listRunningProcesses(String processName) {
         List<Process> processes = new ArrayList<>();
+        String filter = processName == null ? "" : " /fi \"IMAGENAME eq " + processName + "\"";
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
-                Runtime.getRuntime().exec("tasklist.exe /fo csv /nh").getInputStream()))) {
+                Runtime.getRuntime().exec("tasklist /fo csv /nh" + filter).getInputStream()))) {
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 String[] lineToArray = line.substring(1,line.length()-1).split("\",\"");
@@ -28,26 +29,23 @@ public class WindowsUtils {
     }
 
     public static boolean processesContainLike(String string) {
-        return listRunningProcesses().stream().anyMatch(s -> s.getName().contains(string));
+        return listRunningProcesses(null).stream().anyMatch(s -> s.getName().contains(string));
     }
 
     public static Integer getTotalMemory(String processName) {
-        return listRunningProcesses().stream()
-                .filter(process -> processName == null || process.getName().equals(processName))
-                .map(Process::getMemory)
-                .reduce(0, Integer::sum);
+        return listRunningProcesses(processName).stream().map(Process::getMemory).reduce(0, Integer::sum);
     }
 
-    public static Long countProcesses() {
-        return (long) listRunningProcesses().size();
+    public static Long countProcesses(String processName) {
+        return (long) listRunningProcesses(processName).size();
     }
 
     public static Long countDistinctProcesses() {
-        return listRunningProcesses().stream().map(Process::getName).distinct().count();
+        return listRunningProcesses(null).stream().map(Process::getName).distinct().count();
     }
 
-    public static List<String> getOutput(Order order) {
-        int len = listRunningProcesses().stream()
+    public static List<String> getOutput(Order order, String processName) {
+        int len = listRunningProcesses(processName).stream()
                 .map(p -> p.getName().length())
                 .max(Integer::compare).orElseThrow(NoSuchElementException::new);
         String format = "%-" + len + "s   %-5d   %7.02f MB";
@@ -60,7 +58,7 @@ public class WindowsUtils {
             default: comparator = (p1, p2) -> 0;
         }
 
-        return listRunningProcesses().stream()
+        return listRunningProcesses(processName).stream()
                 .sorted(comparator)
                 .map(p -> String.format(format, p.getName(), p.getPid(), p.getMemory()/1024.0))
                 .collect(Collectors.toList());
@@ -76,9 +74,13 @@ public class WindowsUtils {
     public static void main(String[] args) {
         System.out.printf("Total memory consumption is %.2f GB\n", getTotalMemory(null)/1048576.0);
         System.out.printf("Total processes count is %d; of them, %d are distinct\n",
-                countProcesses(), countDistinctProcesses());
-        System.out.printf("Processes contain something like 'java': %s\n", processesContainLike("java"));
+                countProcesses(null), countDistinctProcesses());
+
+        System.out.printf("Processes contain something like 'chrome': %s\n", processesContainLike("chrome"));
+
+        System.out.printf("'Chrome.exe' processes count is %d\n", countProcesses("chrome.exe"));
+        System.out.printf("Memory consumption for 'chrome.exe' is %.2f GB\n", getTotalMemory("chrome.exe")/1048576.0);
         System.out.println("---");
-        getOutput(Order.BY_NAME).forEach(System.out::println);
+        getOutput(Order.BY_MEMORY_DESC, "chrome.exe").forEach(System.out::println);
     }
 }
