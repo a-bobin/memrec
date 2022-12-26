@@ -18,7 +18,7 @@ public class Recorder implements Runnable {
 
     private final String csvSeparator, decSeparator;
 
-    private final boolean showOverlay;
+    private final boolean showOverlay, showTimer;
 
     private final String fileName;
 
@@ -36,6 +36,7 @@ public class Recorder implements Runnable {
         csvSeparator = properties.get("separator.csv");
         decSeparator = properties.get("separator.decimal");
         showOverlay = Boolean.parseBoolean(properties.get("overlay.show"));
+        showTimer = Boolean.parseBoolean(properties.get("timer.show"));
         int overlayOpacity = Integer.parseInt(properties.get("overlay.opacity"));
         int fontSize = Integer.parseInt(properties.get("overlay.font.size"));
         String[] fontColorRGB = properties.get("overlay.font.color").split(",");
@@ -46,6 +47,7 @@ public class Recorder implements Runnable {
         showTimeStart = LocalDateTime.now();
         if (showOverlay) {
             overlay = new Overlay(processName,
+                    showTimer,
                     overlayOpacity,
                     fontSize,
                     Integer.parseInt(fontColorRGB[0]), Integer.parseInt(fontColorRGB[1]), Integer.parseInt(fontColorRGB[2]));
@@ -58,20 +60,25 @@ public class Recorder implements Runnable {
         long tStart0 = System.currentTimeMillis();
         int counter = 0;
         while (true) {
-            long correction = ++counter % 10 == 0 ? (System.currentTimeMillis() - tStart0)%1000L : 0;
+            long correction = ++counter % 12 == 0 ? (System.currentTimeMillis() - tStart0)%1000L : 0;
             long tStart = System.currentTimeMillis();
             LocalDateTime now = LocalDateTime.now();
             String memory = String.format("%.2f", getTotalMemory(processName) / 1024.0).replaceAll("\\D", decSeparator);
             record(memory, now);
             /* skip overlay renewal if getting info was too long, for uniformity */
-            if (System.currentTimeMillis() - tStart > 200 && showOverlay) {
+            if (System.currentTimeMillis() - tStart < 200 && showOverlay) {
                 drawOverlay(memory, now);
             }
+            long workingTime = System.currentTimeMillis() - tStart;
 
             try {
-                Thread.sleep(recalculateSleepTime(interval - correction, System.currentTimeMillis() - tStart, 1000));
+                Thread.sleep(recalculateSleepTime(interval - correction, workingTime, 1000));
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            }
+
+            if (verbose) {
+                System.out.printf("\t  Total time %-7d\n\tWorking time %-4d\n", System.currentTimeMillis() - tStart0, workingTime);
             }
         }
     }
@@ -91,7 +98,9 @@ public class Recorder implements Runnable {
     private void drawOverlay(String memory, LocalDateTime time) {
         overlay.setText2(memory + " MB");
         Duration duration = Duration.between(showTimeStart, time);
-        overlay.setText3(String.format("%02d:%02d:%02d",
-                duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart()));
+        if (showTimer) {
+            overlay.setText3(String.format("%02d:%02d:%02d",
+                    duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart()));
+        }
     }
 }

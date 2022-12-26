@@ -9,7 +9,7 @@ public class Overlay {
 
     private final java.util.List<JLabel> labels;
 
-    public Overlay(String processName, int opacity, int fontSize, int colorR, int colorG, int colorB) {
+    public Overlay(String processName, boolean showTimer, int opacity, int fontSize, int colorR, int colorG, int colorB) {
         labels = java.util.List.of(new JLabel(""), new JLabel(""), new JLabel(""));
         labels.forEach(l -> l.setFont(new Font("Verdana", Font.BOLD, fontSize)));
         labels.forEach(l -> l.setForeground(new Color(colorR, colorG, colorB)));
@@ -27,7 +27,7 @@ public class Overlay {
         frame.setAlwaysOnTop(true);
         frame.setPreferredSize(new Dimension((
                 processName.length() < 8 ? fontSize*6 : (fontSize-9)*(processName.length()+4)),
-                (fontSize+3)*4
+                (fontSize+3)*(showTimer? 4 : 3)
         ));
         frame.setBackground(new Color(0, 0, 0, opacity));
         frame.setLocation(100, 100);

@@ -26,6 +26,7 @@ public class FileUtils {
             "separator.csv=;\n" +
             "separator.decimal=.\n" +
             "overlay.show=true\n" +
+            "timer.show=false\n" +
             "overlay.opacity=188\n" +
             "overlay.font.size=21\n" +
             "overlay.font.color=177,188,85";
@@ -54,8 +55,8 @@ public class FileUtils {
             propertiesMap.put(propertyName, properties.getProperty(propertyName));
         }
 
-        if (List.of("process", "interval", "separator.csv", "separator.decimal", "overlay.show", "overlay.opacity",
-                "overlay.font.size", "overlay.font.color").stream()
+        if (List.of("process", "interval", "separator.csv", "separator.decimal", "overlay.show", "timer.show",
+                "overlay.opacity", "overlay.font.size", "overlay.font.color").stream()
                 .map(propertiesMap::get)
                 .anyMatch(Objects::isNull)) {
             throw new RuntimeException("Properties file is not valid, try to delete and run again");
