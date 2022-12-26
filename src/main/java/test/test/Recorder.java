@@ -63,7 +63,8 @@ public class Recorder implements Runnable {
             LocalDateTime now = LocalDateTime.now();
             String memory = String.format("%.2f", getTotalMemory(processName) / 1024.0).replaceAll("\\D", decSeparator);
             record(memory, now);
-            if (showOverlay) {
+            /* skip overlay renewal if getting info was too long, for uniformity */
+            if (System.currentTimeMillis() - tStart > 200 && showOverlay) {
                 drawOverlay(memory, now);
             }
 
